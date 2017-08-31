@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script type="text/javascript" src="cordova.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="css/myTheme.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.min.js"></script>
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <div data-role="page" id="stronaGlowna">
+        <div data-role="panel" id="myPanel1" data-display="overlay">
+            <h2>Moje przepisy</h2>
+            <ul data-role="listview">
+                <li><a href="#stronaGlowna" class="ui-btn ui-icon-home ui-btn-icon-right">Strona główna</a></li>
+                <li><a href="#sniadanie" class="ui-btn ui-icon-gear ui-btn-icon-right">Śniadanie</a></li>
+                <li><a href="#obiad" class="ui-btn ui-icon-clock ui-btn-icon-right">Obiad</a></li>
+                <li><a href="#kolacja" class="ui-btn ui-icon-star ui-btn-icon-right">Kolacja</a></li>
+                <li><a href="#deser" class="ui-btn ui-icon-heart ui-btn-icon-right">Deser</a></li>
+                <li><a href="#dodaj_przepis" class="ui-btn ui-icon-plus ui-btn-icon-right">Dodaj przepis</a></li>
+                <li><a href="#informacje" class="ui-btn ui-icon-info ui-btn-icon-right">Informacje</a></li>
+            </ul>
+        </div>
+        <div data-role="header">
+            <h1>Strona główna</h1>
+            <a href="#myPanel1" class="ui-btn ui-icon-bars ui-btn-icon-left ui-btn-icon-notext ui-btn-inline ui-corner-all ui-shadow">Open Panel</a>
+        </div>
+        <div data-role="main" class="ui-content">
+            <button id="nawiguj" onclick="nav()">Nawiguj do restauracji</button>
+            <script>
+            db = window.openDatabase("recipe.db", "1.0", 'Recipe', 2 * 1024 * 1024);
+
+
+            db.transaction(function(tx) {
+                tx.executeSql("CREATE TABLE IF NOT EXISTS recipe (type text, name text, ingredients text, desc text, picture blob)", []);
+            }, function(err) {
+                alert('Wystąpił błąd');
+            }, function() {
+
+
+                alert("tabela recipe stworzona");
+
+            });
+
+            function zapisz() {
+                var typeVal = $('#rodzaj option:selected').val();
+                var nameVal = $('#nazwa').val();
+                var ingredientsVal = $('#skladniki').val();
+                var descVal = $('#opis').val();
+                var file = $('#plik').prop('files')[0];
+                var img = document.createElement("img");
+
+                img.classList.add("obj");
+                img.file = file;
+
+                var reader = new FileReader();
+                reader.onload = (function(aImg) {
+                    return function(e) {
+                        aImg.src = e.target.result;
+                        db.transaction(function(tx) {
+                            tx.executeSql('INSERT INTO recipe (type, name, ingredients, desc, picture) VALUES (?,?,?,?,?)', [typeVal, nameVal, ingredientsVal, descVal, aImg.src]);
+                            // alert('rodzaj: ' + typeVal + 'nazwa: ' + nameVal + 'skladniki: ' + ingredientsVal + 'opis: ' + descVal);
+                        });
+
+                    };
+                })(img);
+                reader.readAsDataURL(file);
+
+
+
+            }
+
+            function wczytajSniadanie() {
+
+
+
+                db.transaction(function(tx) {
+                    tx.executeSql('SELECT * FROM recipe WHERE type="śniadanie"', [], function(tx, res) {
+                        for (var i = 0; i < res.rows.length; i++) {
+                            var item = res.rows.item(i);
+                            console.log('selected: ' + item.type);
+                            console.log('selected: ' + item.name);
+                            console.log('selected: ' + item.ingredients);
+                            console.log('selected: ' + item.desc);
+                            // console.log('selected picture: ' + item.picture);
+
+
+                            getType = item.type;
+                            getName = item.name;
+                            getIngredients = item.ingredients;
+                            getDesc = item.desc;
+                            getPicture = item.picture;
+
+                            $('#sklIDsniadanie').append(getIngredients);
+                            $('#przIDsniadanie').append(getName);
+                            $('#przIDsniadanie').append('<p></p>');
+                            $('#przIDsniadanie').append('<img src=' + getPicture + '>');
+
+
+
+                        }
+                    });
+                });
+            }
+
+            function wczytajObiad() {
+
+                db.transaction(function(tx) {
+                    tx.executeSql('SELECT * FROM recipe WHERE type="obiad"', [], function(tx, res) {
+                        for (var i = 0; i < res.rows.length; i++) {
+                            var item = res.rows.item(i);
+                            console.log('selected: ' + item.type);
+                            console.log('selected: ' + item.name);
+                            console.log('selected: ' + item.ingredients);
+                            console.log('selected: ' + item.desc);
+
+                            getType = item.type;
+                            getName = item.name;
+                            getIngredients = item.ingredients;
+                            getDesc = item.desc;
+
+
+                            $('#sklIDobiad').append(getIngredients);
+                            $('#przIDobiad').append(getName);
+                            $('#przIDobiad').append('<p></p>');
+                            $('#przIDobiad').append('<img src=' + getPicture + '>');
+
+
+
+
+                        }
+                    });
+                });
+            }
+
+            function wczytajKolacja() {
+
+                db.transaction(function(tx) {
+                    tx.executeSql('SELECT * FROM recipe WHERE type="kolacja"', [], function(tx, res) {
+                        for (var i = 0; i < res.rows.length; i++) {
+                            var item = res.rows.item(i);
+                            console.log('selected: ' + item.type);
+                            console.log('selected: ' + item.name);
+                            console.log('selected: ' + item.ingredients);
+                            console.log('selected: ' + item.desc);
+
+                            getType = item.type;
+                            getName = item.name;
+                            getIngredients = item.ingredients;
+                            getDesc = item.desc;
+
+
+                            $('#sklIDkolacja').append(getIngredients);
+                            $('#przIDkolacja').append(getName);
+                            $('#przIDkolacja').append('<p></p>');
+                            $('#przIDkolacja').append('<img src=' + getPicture + '>');
+
+
+
+                        }
+                    });
+                });
+            }
+
+            function wczytajDeser() {
+
+                db.transaction(function(tx) {
+                    tx.executeSql('SELECT * FROM recipe WHERE type="deser"', [], function(tx, res) {
+                        for (var i = 0; i < res.rows.length; i++) {
+                            var item = res.rows.item(i);
+                            console.log('selected: ' + item.type);
+                            console.log('selected: ' + item.name);
+                            console.log('selected: ' + item.ingredients);
+                            console.log('selected: ' + item.desc);
+
+                            getType = item.type;
+                            getName = item.name;
+                            getIngredients = item.ingredients;
+                            getDesc = item.desc;
+
+
+                            $('#sklIDdeser').append(getIngredients);
+                            $('#przIDdeser').append(getName);
+                            $('#przIDdeser').append('<p></p>');
+                            $('#przIDdeser').append('<img src=' + getPicture + '>');
+
+
+
+                        }
+                    });
+                });
+            }
+
+            function usunSniadanie() {
+                $('#breakfast').click(function() {
+                    $('#sklIDsniadanie').text('');
+                    $('#przIDsniadanie').text('');
+
+                });
+            }
+
+            function usunObiad() {
+                $('#dinner').click(function() {
+                    $('#sklIDobiad').text('');
+                    $('#przIDobiad').text('');
+
+                });
+
+
+
+            }
+
+            function usunKolacja() {
+                $('#supper').click(function() {
+                    $('#sklIDkolacja').text('');
+                    $('#przIDkolacja').text('');
+
+                });
+            }
+
+            function usunDeser() {
+                $('#dessert').click(function() {
+                    $('#sklIDdeser').text('');
+                    $('#przIDdeser').text('');
+
+                });
+            }
+
+            function usunWszystkie() {
+                $('#sklIDsniadanie').text('');
+                $('#przIDsniadanie').text('');
+                $('#sklIDobiad').text('');
+                $('#przIDobiad').text('');
+                $('#sklIDkolacja').text('');
+                $('#przIDkolacja').text('');
+                $('#sklIDdeser').text('');
+                $('#przIDdeser').text('');
+                db.transaction(function(tx) {
+                    tx.executeSql('DELETE FROM recipe');
+                    alert('Usunięto wszystkie przepisy');
+                });
+            }
+
+
+
+
+            function nav() {
+                launchnavigator.isAppAvailable(launchnavigator.APP.GOOGLE_MAPS, function(isAvailable) {
+                    var app;
+                    if (isAvailable) {
+                        app = launchnavigator.APP.GOOGLE_MAPS;
+                    } else {
+                        alert("Google Maps not available - falling back to user selection");
+                        app = launchnavigator.APP.USER_SELECT;
+                    }
+                    launchnavigator.navigate("ul.Rynek Główny 1, Kraków, Polska", {
+                        app: app
+                    });
+                })
+            };
+            </script>
+            <button id="btn_skanuj" onclick="scan()">Zrób zdjęcie</button>
+            <script>
+            function scan() {
+                navigator.camera.getPicture(onSuccess, onFail, {
+                    quality: 50,
+                    destinationType: Camera.DestinationType.FILE_URI,
+                    saveToPhotoAlbum: true
+                });
+
+                function onSuccess(imageData) {
+                    image = imageData;
+                    span = document.getElementById("span");
+                    span.innerHTML = ['<img src="', image,
+                        '" title="', image, '" style="width: 50%; height: 50%"/>'
+                    ].join('');
+                }
+
+                function onFail(message) {
+                    alert('Failed because: ' + message);
+                }
+            }
+            </script>
+            <button id="stan_sieci" onclick="checkConnection()">Sprawdź stan sieci</button>
+            <p></p>
+            <button id="wszystkie_przepisy" onclick="usunWszystkie()">Usuń wszystkie przepisy</button>
+            <script>
+            function checkConnection() {
+                var networkState = navigator.connection.type;
+
+                var states = {};
+                states[Connection.UNKNOWN] = 'Nieznany';
+                states[Connection.ETHERNET] = 'Ethernet';
+                states[Connection.WIFI] = 'WiFi';
+                states[Connection.CELL_2G] = 'Sieć 2G';
+                states[Connection.CELL_3G] = 'Sieć 3G';
+                states[Connection.CELL_4G] = 'Sieć 4G';
+                states[Connection.CELL] = 'Sieć';
+                states[Connection.NONE] = 'Brak';
+
+                alert('Typ połączenia ' + states[networkState]);
+            };
+            </script>
+        </div>
+    </div>
+    <div data-role="page" id="sniadanie">
+        <div data-role="panel" id="myPanel2" data-display="overlay">
+            <h2>Moje przepisy</h2>
+            <ul data-role="listview">
+                <li><a href="#stronaGlowna" class="ui-btn ui-icon-home ui-btn-icon-right">Strona główna</a></li>
+                <li><a href="#sniadanie" class="ui-btn ui-icon-check ui-btn-icon-right">Śniadanie</a></li>
+                <li><a href="#obiad" class="ui-btn ui-icon-edit ui-btn-icon-right">Obiad</a></li>
+                <li><a href="#kolacja" class="ui-btn ui-icon-search ui-btn-icon-right">Kolacja</a></li>
+                <li><a href="#deser" class="ui-btn ui-icon-info ui-btn-icon-right">Deser</a></li>
+                <li><a href="#dodaj_przepis" class="ui-btn ui-icon-plus ui-btn-icon-right">Dodaj przepis</a></li>
+                <li><a href="#informacje" class="ui-btn ui-icon-info ui-btn-icon-right">Informacje</a></li>
+            </ul>
+        </div>
+        <div data-role="header">
+            <h1>Śniadanie</h1>
+            <a href="#myPanel2" class="ui-btn ui-icon-bars ui-btn-icon-left ui-btn-icon-notext ui-btn-inline ui-corner-all ui-shadow">Open Panel</a>
+        </div>
+        <div data-role="main" class="ui-content">
+            <button onclick="wczytajSniadanie()" class="ui-btn">Wczytaj</button>
+            <button id="breakfast" onclick="usunSniadanie()" class="ui-btn">Usuń</button>
+            <h2 align="center"><font color="#1680BC">Składniki i opis wykonania</font></h2>
+            <h3 align="center" id="sklIDsniadanie"></h3>
+            <h2 align="center"><font color="#1680BC">Przepis</font></h2>
+            <h3 align="center" id="przIDsniadanie"></h3>
+            <button id="nast" onclick="nastepnePyt()">Nastepny przepis</button>
+        </div>
+        <script>
+        </script>
+        <div data-role="footer">
+            <h1>© Justyna Gruca, Natalia Gola</h1>
+        </div>
+    </div>
+    <div data-role="page" id="obiad">
+        <div data-role="panel" id="myPanel3" data-display="overlay">
+            <h2>Moje przepisy</h2>
+            <ul data-role="listview">
+                <li><a href="#stronaGlowna" class="ui-btn ui-icon-home ui-btn-icon-right">Strona główna</a></li>
+                <li><a href="#sniadanie" class="ui-btn ui-icon-gear ui-btn-icon-right">Śniadanie</a></li>
+                <li><a href="#obiad" class="ui-btn ui-icon-clock ui-btn-icon-right">Obiad</a></li>
+                <li><a href="#kolacja" class="ui-btn ui-icon-star ui-btn-icon-right">Kolacja</a></li>
+                <li><a href="#deser" class="ui-btn ui-icon-heart ui-btn-icon-right">Deser</a></li>
+                <li><a href="#dodaj_przepis" class="ui-btn ui-icon-plus ui-btn-icon-right">Dodaj przepis</a></li>
+                <li><a href="#informacje" class="ui-btn ui-icon-info ui-btn-icon-right">Informacje</a></li>
+            </ul>
+        </div>
+        <div data-role="header">
+            <h1>Obiad</h1>
+            <a href="#myPanel3" class="ui-btn ui-icon-bars ui-btn-icon-left ui-btn-icon-notext ui-btn-inline ui-corner-all ui-shadow">Open Panel</a>
+        </div>
+        <div data-role="main" class="ui-content">
+            <button onclick="wczytajObiad()" class="ui-btn">Wczytaj</button>
+            <button id="dinner" onclick="usunObiad()" class="ui-btn">Usuń</button>
+            <h2 align="center"><font color="#1680BC">Składniki i opis wykonania</font></h2>
+            <h3 align="center" id="sklIDobiad"></h3>
+            <h2 align="center"><font color="#1680BC">Przepis</font></h2>
+            <h3 align="center" id="przIDobiad"></h3>
+            <button id="nast" onclick="nastepnePyt()">Nastepny przepis</button>
+        </div>
+        <script>
+        </script>
+        <div data-role="footer">
+            <h1>© Justyna Gruca, Natalia Gola</h1>
+        </div>
+    </div>
+    <div data-role="page" id="kolacja">
+        <div data-role="panel" id="myPanel4" data-display="overlay">
+            <h2>Moje przepisy</h2>
+            <ul data-role="listview">
+                <li><a href="#stronaGlowna" class="ui-btn ui-icon-home ui-btn-icon-right">Strona główna</a></li>
+                <li><a href="#sniadanie" class="ui-btn ui-icon-gear ui-btn-icon-right">Śniadanie</a></li>
+                <li><a href="#obiad" class="ui-btn ui-icon-clock ui-btn-icon-right">Obiad</a></li>
+                <li><a href="#kolacja" class="ui-btn ui-icon-star ui-btn-icon-right">Kolacja</a></li>
+                <li><a href="#deser" class="ui-btn ui-icon-heart ui-btn-icon-right">Deser</a></li>
+                <li><a href="#dodaj_przepis" class="ui-btn ui-icon-plus ui-btn-icon-right">Dodaj przepis</a></li>
+                <li><a href="#informacje" class="ui-btn ui-icon-info ui-btn-icon-right">Informacje</a></li>
+            </ul>
+        </div>
+        <div data-role="header">
+            <h1>Kolacja</h1>
+            <a href="#myPanel4" class="ui-btn ui-icon-bars ui-btn-icon-left ui-btn-icon-notext ui-btn-inline ui-corner-all ui-shadow">Open Panel</a>
+        </div>
+        <div data-role="main" class="ui-content">
+            <button onclick="wczytajKolacja()" class="ui-btn">Wczytaj</button>
+            <button id="supper" onclick="usunKolacja()" class="ui-btn">Usuń</button>
+            <h2 align="center"><font color="#1680BC">Składniki i opis wykonania</font></h2>
+            <h3 align="center" id="sklIDkolacja"></h3>
+            <h2 align="center"><font color="#1680BC">Przepis</font></h2>
+            <h3 align="center" id="przIDkolacja"></h3>
+            <button id="nast" onclick="nastepnePyt()">Nastepny przepis</button>
+        </div>
+        <div data-role="footer">
+            <h1>© Justyna Gruca, Natalia Gola</h1>
+        </div>
+    </div>
+    <div data-role="page" id="deser">
+        <div data-role="panel" id="myPanel5" data-display="overlay">
+            <h2>Moje przepisy</h2>
+            <ul data-role="listview">
+                <li><a href="#stronaGlowna" class="ui-btn ui-icon-home ui-btn-icon-right">Strona główna</a></li>
+                <li><a href="#sniadanie" class="ui-btn ui-icon-gear ui-btn-icon-right">Śniadanie</a></li>
+                <li><a href="#obiad" class="ui-btn ui-icon-clock ui-btn-icon-right">Obiad</a></li>
+                <li><a href="#kolacja" class="ui-btn ui-icon-star ui-btn-icon-right">Kolacja</a></li>
+                <li><a href="#deser" class="ui-btn ui-icon-heart ui-btn-icon-right">Deser</a></li>
+                <li><a href="#dodaj_przepis" class="ui-btn ui-icon-plus ui-btn-icon-right">Dodaj przepis</a></li>
+                <li><a href="#informacje" class="ui-btn ui-icon-info ui-btn-icon-right">Informacje</a></li>
+            </ul>
+        </div>
+        <div data-role="header">
+            <h1>Deser</h1>
+            <a href="#myPanel5" class="ui-btn ui-icon-bars ui-btn-icon-left ui-btn-icon-notext ui-btn-inline ui-corner-all ui-shadow">Open Panel</a>
+        </div>
+        <div data-role="main" class="ui-content">
+            <button onclick="wczytajDeser()" class="ui-btn">Wczytaj</button>
+            <button id="dessert" onclick="usunDeser()" class="ui-btn">Usuń</button>
+            <h2 align="center"><font color="#1680BC">Składniki i opis wykonania</font></h2>
+            <h3 align="center" id="sklIDdeser"></h3>
+            <h2 align="center"><font color="#1680BC">Przepis</font></h2>
+            <h3 align="center" id="przIDdeser"></h3>
+            <button id="nast" onclick="nastepnePyt()">Nastepny przepis</button>
+        </div>
+        <div data-role="footer">
+            <h1>© Justyna Gruca, Natalia Gola</h1>
+        </div>
+    </div>
+    <div data-role="page" id="dodaj_przepis">
+        <div data-role="panel" id="myPanel6" data-display="overlay">
+            <h2>Moje przepisy</h2>
+            <ul data-role="listview">
+                <li><a href="#stronaGlowna" class="ui-btn ui-icon-home ui-btn-icon-right">Strona główna</a></li>
+                <li><a href="#sniadanie" class="ui-btn ui-icon-gear ui-btn-icon-right">Śniadanie</a></li>
+                <li><a href="#obiad" class="ui-btn ui-icon-clock ui-btn-icon-right">Obiad</a></li>
+                <li><a href="#kolacja" class="ui-btn ui-icon-star ui-btn-icon-right">Kolacja</a></li>
+                <li><a href="#deser" class="ui-btn ui-icon-heart ui-btn-icon-right">Deser</a></li>
+                <li><a href="#dodaj_przepis" class="ui-btn ui-icon-plus ui-btn-icon-right">Dodaj przepis</a></li>
+                <li><a href="#informacje" class="ui-btn ui-icon-info ui-btn-icon-right">Informacje</a></li>
+            </ul>
+        </div>
+        <div data-role="header">
+            <h1>Dodaj przepis</h1>
+            <a href="#myPanel6" class="ui-btn ui-icon-bars ui-btn-icon-left ui-btn-icon-notext ui-btn-inline ui-corner-all ui-shadow">Open Panel</a>
+        </div>
+        <div data-role="main" class="ui-content">
+            <form method="post" action="#">
+                <fieldset class="ui-field-contain">
+                    <label for="rodzaj">Rodzaj posiłku</label>
+                    <select name="rodzaj" id="rodzaj">
+                        <option value="śniadanie">Śniadanie</option>
+                        <option value="obiad">Obiad</option>
+                        <option value="kolacja">Kolacja</option>
+                        <option value="deser">Deser</option>
+                    </select>
+                </fieldset>
+                <label for="nazwa">Nazwa posiłku:</label>
+                <input type="text" name="nazwa" id="nazwa" />
+                <label for="skladniki">Składniki i opis wykonania:</label>
+                <textarea name="skladniki" id="skladniki"></textarea>
+                <label for="plik">Załącz zdjęcie</label>
+                <input type="file" name="plik" id="plik" accept="image/*" />
+                <span id="span"><img id="camera" src="" /></span>
+                <a href="#" onclick="zdjecie()" class="ui-btn ui-icon-camera ui-btn-icon-left ui-corner-all ui-shadow">Zrób zdjęcie</a>
+                <a href="#" onclick="zapisz()" class="ui-btn">Zapisz</a>
+            </form>
+        </div>
+        <div data-role="footer">
+            <h1>© Justyna Gruca, Natalia Gola</h1>
+        </div>
+    </div>
+    <div data-role="page" id="informacje">
+        <div data-role="panel" id="myPanel7" data-display="overlay">
+            <h2>Moje przepisy</h2>
+            <ul data-role="listview">
+                <li><a href="#stronaGlowna" class="ui-btn ui-icon-home ui-btn-icon-right">Strona główna</a></li>
+                <li><a href="#sniadanie" class="ui-btn ui-icon-gear ui-btn-icon-right">Śniadanie</a></li>
+                <li><a href="#obiad" class="ui-btn ui-icon-clock ui-btn-icon-right">Obiad</a></li>
+                <li><a href="#kolacja" class="ui-btn ui-icon-star ui-btn-icon-right">Kolacja</a></li>
+                <li><a href="#deser" class="ui-btn ui-icon-heart ui-btn-icon-right">Deser</a></li>
+                <li><a href="#dodaj_przepis" class="ui-btn ui-icon-plus ui-btn-icon-right">Dodaj przepis</a></li>
+                <li><a href="#informacje" class="ui-btn ui-icon-info ui-btn-icon-right">Informacje</a></li>
+            </ul>
+        </div>
+        <div data-role="header">
+            <h1>Informacje</h1>
+            <a href="#myPanel7" class="ui-btn ui-icon-bars ui-btn-icon-left ui-btn-icon-notext ui-btn-inline ui-corner-all ui-shadow">Open Panel</a>
+        </div>
+        <div data-role="main" class="ui-content">
+            <h2> Informacje o aplikacji </h2>
+            <h4> Wersja programu : 1.0.0 </h4>
+            <div data-role="main" class="ui-content">
+                <div data-role="collapsible">
+                    <h3>Opis</h3>
+                    <p> Aplikacja umożliwia dodawanie własnych przepisów kulinarnych wraz ze zdjęciami </p>
+                </div>
+                <div data-role="main" class="ui-content">
+                    <div data-role="collapsible">
+                        <h3>Strona główna</h3>
+                        <p>Przycisk <b>Nawiguj do restauracji</b> pozwala na wyznaczenie drogi z obecnej lokalizacji do uczelni.</p>
+                        <p>Przycisk <b>Dodaj zdjęcie</b> pozwala wykonać zdjęcie.</p>
+                        <p>Przycisk <b>Sprawdź stan sieci</b> odczytuje informacje o sieci do której podłączony jest telefon.</p>
+                    </div>
+                </div>
+                <div data-role="main" class="ui-content">
+                    <div data-role="collapsible">
+                        <h3>Śniadanie</h3>
+                        <p>Pozwala na znalezienie przepisu.</p>
+                    </div>
+                </div>
+                <div data-role="main" class="ui-content">
+                    <div data-role="collapsible">
+                        <h3>Obiad</h3>
+                        <p>Pozwala na znalezienie przepisu.</p>
+                    </div>
+                </div>
+                <div data-role="main" class="ui-content">
+                    <div data-role="collapsible">
+                        <h3>Kolacja</h3>
+                        <p>Pozwala na znalezienie przepisu.</p>
+                    </div>
+                </div>
+                <div data-role="main" class="ui-content">
+                    <div data-role="collapsible">
+                        <h3>Deser</h3>
+                        <p>Pozwala na znalezienie przepisu.</p>
+                    </div>
+                </div>
+                <div data-role="main" class="ui-content">
+                    <div data-role="collapsible">
+                        <h3>Dodaj przepis</h3>
+                        <p>Pozwala na dodanie przepisu.</p>
+                    </div>
+                </div>
+                <div data-role="main" class="ui-content">
+                    <div data-role="collapsible">
+                        <h3>O autorze</h3>
+                        <p>Autorzy aplikacji: <b>Justyna Gruca, Natalia Gola </b></p>
+                        <p>Numer grupy dziekańskiej: <b>KrDUIs2012</b></p>
+                    </div>
+                </div>
+                <div data-role="footer">
+                    <h1>©Justyna Gruca, Natalia Gola</h1>
+                </div>
+            </div>
+</body>
+
+</html>

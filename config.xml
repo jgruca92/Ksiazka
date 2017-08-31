@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns     = "http://www.w3.org"
+        xmlns:gap = "http://phonegap.com/ns/1.0"
+        id        = "pl.grucajustynanataliagola.ksiazkakucharska"
+        versionCode = "1"
+        version   = "1.0.0">
+		<name>Ksiazka Kucharska</name>
+		<description>Aplikacja mająca na celu pomoc w gotowaniu</description>
+		<author>HJustyna Gruca, Natalia Gola</author>
+
+		 <platform name="android">
+        <platform name="android">
+        <icon src="icon.png" width="200" height="200" />
+</platform>
+    </platform>
+
+<preference name="SplashScreen" value="splash" />
+<preference name="SplashScreenDelay" value="5000" />
+<gap:plugin name="cordova-plugin-network-information" source="npm" />
+<gap:plugin name="cordova-plugin-camera" source="npm" />
+<plugin name="cordova-plugin-splashscreen" spec="~4.0.2" />
+<plugin name="uk.co.workingedge.phonegap.plugin.launchnavigator" source="npm" />
+<preference name="phonegap-version" value="cli-6.5.0" />
+<splash src="splash.png" platform="android" qualifier="ldpi" width="500" height="500" />
+<splash src="splash.png" />
+</widget>
